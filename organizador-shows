@@ -1,0 +1,96 @@
+CREATE TABLE usuario (
+	cpf 		CHAR(11)		PRIMARY KEY,
+	nome 		VARCHAR (60)	NOT NULL,
+	email 		VARCHAR(50)		UNIQUE NOT NULL,
+	data_nasc 	DATE			NOT NULL
+);
+
+CREATE TABLE telefone_usuario (
+	cpf			CHAR(11)		REFERENCES Usuario(cpf),
+	telefone 	VARCHAR(15),
+	PRIMARY KEY (cpf, telefone)
+);
+
+CREATE TABLE artista (
+	cpf/cnpj 		VARCHAR(12)		PRIMARY KEY,
+	nome_artistico	VARCHAR(30)		NOT NULL,
+	genero_musical 	VARCHAR (20) 	NOT NULL,
+	pais_origem 	VARCHAR (20)	NOT NULL,
+	biografia 		VARCHAR (200)	NOT NULL
+);
+
+CREATE TABLE influencia_artista (
+	id_artista_origem			INTEGER		REFERENCES artista(id),
+	id_artista_influenciado		INTEGER		REFERENCES artista(id),
+	PRIMARY KEY(Id_artista_origem, id_artista_influenciado)
+);
+
+CREATE TABLE local (
+	id 				INTEGER 		PRIMARY KEY,
+	nome 			VARCHAR (20)	NOT NULL,
+	endereco 		VARCHAR(40)		NOT NULL,
+	cidade 			VARCHAR(20) 	NOT NULL,
+	estado 			VARCHAR (20) 	NOT NULL,
+	capacidade_max	INTEGER 		NOT NULL
+); 
+
+CREATE TABLE evento (
+	id 						INTEGER			PRIMARY KEY,
+	id_local 				INTEGER			NOT NULL REFERENCES local(id),
+	cpf/cnpj_artista 		VARCHAR(11)		NOT NULL REFERENCES artista(cpf/cnpj),
+	titulo 					VARCHAR(30)		NOT NULL,
+	descricao 				VARCHAR (70)	NOT NULL,
+	data_hora_inicio 		DATE 			NOT NULL,
+	data_hora_fim 			DATE 			NOT NULL,
+	classificacao_etaria	INTEGER 		NOT NULL
+);
+
+CREATE TABLE setor (
+	id 			INTEGER 		PRIMARY KEY,
+	id_local 	INTEGER 		NOT NULL REFERENCES local(id) ON DELETE CASCADE,
+	nome 		VARCHAR(20)		NOT NULL,
+	capacidade 	INTEGER			NOT NULL
+);
+
+CREATE TABLE pedido (
+	id 				INTEGER			PRIMARY KEY,	
+	id_usuario		INTEGER 		NOT NULL REFERENCES usuario(id) ON DELETE CASCADE,
+	valor_total 	NUMERIC(10, 2)	NOT NULL
+);
+
+CREATE TABLE ingresso (
+	id 				INTEGER			PRIMARY KEY,
+	id_evento 		INTEGER			NOT NULL REFERENCES evento(id) ON DELETE CASCADE,
+	id_pedido 		INTEGER 		NOT NULL REFERENCES pedido(id),
+	tipo_entrada 	VARCHAR(20)		NOT NULL,
+	Numero_assento 	INTEGER,		--NULL se não houver numeração de assento!
+	data_compra 	DATE			NOT NULL
+);
+
+CREATE TABLE produto_merch (
+	id			INTEGER			PRIMARY KEY,
+	id_evento 	INTEGER			NOT NULL REFERENCES evento(id),
+	nome		VARCHAR(40)		NOT NULL,
+	valor		NUMERIC(6,2)	NOT NULL
+);
+
+CREATE TABLE variacao_produto (
+	id			INTEGER 		PRIMARY KEY,
+	id_produto	INTEGER			NOT NULL REFERENCES produto(id),
+	tamanho 	VARCHAR(4),		--NULL se não houver variacao de tamanho!
+	quantidade	INTEGER			NOT NULL
+);
+
+CREATE TABLE pedido_ingresso (
+	id			INTEGER			PRIMARY KEY,
+	id_pedido	INTEGER			NOT NULL REFERENCES pedido(id),
+	quantidade	INTEGER			NOT NULL,
+	valor_total	NUMERIC(10,2)	NOT NULL
+);
+
+CREATE TABLE pedido_merch (
+	id 			INTEGER			PRIMARY KEY,
+	id_pedido	INTEGER			NOT NULL REFERENCES pedido(id),
+	quantidade	INTEGER			NOT NULL,
+	valor_total	NUMERIC(10,2)	NOT NULL
+);
