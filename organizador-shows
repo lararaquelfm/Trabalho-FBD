@@ -20,9 +20,9 @@ CREATE TABLE artista (
 );
 
 CREATE TABLE influencia_artista (
-	id_artista_origem			INTEGER		REFERENCES artista(id),
-	id_artista_influenciado		INTEGER		REFERENCES artista(id),
-	PRIMARY KEY(Id_artista_origem, id_artista_influenciado)
+	id_artista_principal		INTEGER		REFERENCES artista(id),
+	id_artista_coadjuvante		INTEGER		REFERENCES artista(id),
+	PRIMARY KEY(id_artista_principal, id_artista_coadjuvante)
 );
 
 CREATE TABLE local (
@@ -53,9 +53,13 @@ CREATE TABLE setor (
 );
 
 CREATE TABLE pedido (
-	id 				INTEGER			PRIMARY KEY,	
-	id_usuario		INTEGER 		NOT NULL REFERENCES usuario(id) ON DELETE CASCADE,
-	valor_total 	NUMERIC(10, 2)	NOT NULL
+	id 					INTEGER			PRIMARY KEY,	
+	id_usuario			INTEGER 		NOT NULL REFERENCES usuario(id) ON DELETE CASCADE,
+	--depois resolver problema do mesmo usuário comprar merch depois de comprar ingresso, em compras diferentes
+	--pessoa compra ingresso agora e depois quer comprar o merch
+	id_pedido_ingresso	INTEGER			REFERENCES pedido_ingresso(id),
+	id_pedido_merch		INTEGER			REFERENCES pedido_merch(id),
+	valor_total 		NUMERIC(10, 2)	NOT NULL
 );
 
 CREATE TABLE ingresso (
@@ -63,34 +67,26 @@ CREATE TABLE ingresso (
 	id_evento 		INTEGER			NOT NULL REFERENCES evento(id) ON DELETE CASCADE,
 	id_pedido 		INTEGER 		NOT NULL REFERENCES pedido(id),
 	tipo_entrada 	VARCHAR(20)		NOT NULL,
-	Numero_assento 	INTEGER,		--NULL se não houver numeração de assento!
-	data_compra 	DATE			NOT NULL
+	numero_assento 	INTEGER,		--NULL se não houver numeração de assento!
+	valor			NUMERIC (10,2)	NOT NULL,
 );
 
 CREATE TABLE produto_merch (
 	id			INTEGER			PRIMARY KEY,
 	id_evento 	INTEGER			NOT NULL REFERENCES evento(id),
 	nome		VARCHAR(40)		NOT NULL,
+	estoque		INTEGER			NOT NULL CHECK (estoque>=0),
 	valor		NUMERIC(6,2)	NOT NULL
 );
 
-CREATE TABLE variacao_produto (
-	id			INTEGER 		PRIMARY KEY,
-	id_produto	INTEGER			NOT NULL REFERENCES produto(id),
-	tamanho 	VARCHAR(4),		--NULL se não houver variacao de tamanho!
-	quantidade	INTEGER			NOT NULL
-);
-
 CREATE TABLE pedido_ingresso (
-	id			INTEGER			PRIMARY KEY,
+	id_ingresso	INTEGER			NOT NULL REFERENCES ingresso(id),
 	id_pedido	INTEGER			NOT NULL REFERENCES pedido(id),
-	quantidade	INTEGER			NOT NULL,
-	valor_total	NUMERIC(10,2)	NOT NULL
+	PRIMARY KEY (id_ingresso, id_pedido)
 );
 
 CREATE TABLE pedido_merch (
-	id 			INTEGER			PRIMARY KEY,
-	id_pedido	INTEGER			NOT NULL REFERENCES pedido(id),
-	quantidade	INTEGER			NOT NULL,
-	valor_total	NUMERIC(10,2)	NOT NULL
+	id_pedido			INTEGER			NOT NULL REFERENCES pedido(id),
+	id_produto_merch	INTEGER			NOT NULL REFERENCES produto_merch(id),
+	PRIMARY KEY (id_pedido, id_produto_merch)
 );
